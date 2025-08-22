@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+
+#pdtube.FCMacro
+import pdtube
+#above line needed if the class definitions above are place in another file: PDTube.py
+#this is needed if the tube object is to remain parametric after restarting FreeCAD and loading
+#a document containing the object
+
+body = FreeCADGui.ActiveDocument.ActiveView.getActiveObject("pdbody")
+if not body:
+    FreeCAD.Console.PrintError("No active body.\n")
+else:
+    from PySide import QtGui
+    window = FreeCADGui.getMainWindow()
+    items = ["Additive","Subtractive","Neither additive nor subtractive"]
+    item,ok =QtGui.QInputDialog.getItem(window,"Select tube type","Select whether you want additive, subtractive, or neither:",items,0,False)
+    if ok:
+        if item == items[0]:
+            className = "PartDesign::FeatureAdditivePython"
+        elif item == items[1]:
+            className = "PartDesign::FeatureSubtractivePython"
+        else:
+            className = "PartDesign::FeaturePython" #not usable in pattern features, such as polar pattern
+
+        tube = FreeCAD.ActiveDocument.addObject(className,"Tube")
+        pdtube.PDTube(tube)
+        pdtube.PDTubeVP(tube.ViewObject)
+        body.addObject(tube) #optionally we can also use body.insertObject() for placing at particular place in tree
